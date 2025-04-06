@@ -32,27 +32,34 @@ class HandEvaluator
       straight_flush = detect_straight(flush_ranks.map { |r| RANK_ORDER.index(r) }.compact.sort)
 
       if straight_flush
-        return HAND_RANKS[:royal_flush] if straight_flush.max == RANK_ORDER.index("A")
-        return HAND_RANKS[:straight_flush]
+        return {
+          rank: HAND_RANKS[:royal_flush],
+          type: "royal_flush"
+        } if straight_flush.max == RANK_ORDER.index("A")
+
+        return {
+          rank: HAND_RANKS[:straight_flush],
+          type: "straight_flush"
+        }
       end
     end
 
     if rank_counts.values.include?(4)
-      HAND_RANKS[:four_of_a_kind]
+      { rank: HAND_RANKS[:four_of_a_kind], type: "four_of_a_kind" }
     elsif rank_counts.values.sort.reverse[0..1] == [ 3, 2 ]
-      HAND_RANKS[:full_house]
+      { rank: HAND_RANKS[:full_house], type: "full_house" }
     elsif flush_cards.size >= 5
-      HAND_RANKS[:flush]
+      { rank: HAND_RANKS[:flush], type: "flush" }
     elsif straight
-      HAND_RANKS[:straight]
+      { rank: HAND_RANKS[:straight], type: "straight" }
     elsif rank_counts.values.include?(3)
-      HAND_RANKS[:three_of_a_kind]
+      { rank: HAND_RANKS[:three_of_a_kind], type: "three_of_a_kind" }
     elsif rank_counts.values.count(2) >= 2
-      HAND_RANKS[:two_pair]
+      { rank: HAND_RANKS[:two_pair], type: "two_pair" }
     elsif rank_counts.values.include?(2)
-      HAND_RANKS[:pair]
+      { rank: HAND_RANKS[:pair], type: "pair" }
     else
-      HAND_RANKS[:high_card]
+      { rank: HAND_RANKS[:high_card], type: "high_card" }
     end
   end
 

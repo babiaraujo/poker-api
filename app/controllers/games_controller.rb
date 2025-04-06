@@ -87,16 +87,26 @@ class GamesController < ApplicationController
 
     evaluations = players.map do |pg|
       all_cards = pg.cards + game.community_cards
-      rank = HandEvaluator.evaluate(all_cards)
+      hand = HandEvaluator.evaluate(all_cards)
+
+      puts ">> Jogador: #{pg.player.name}"
+      puts "   Cartas do jogador: #{pg.cards.inspect}"
+      puts "   Cartas da mesa:    #{game.community_cards.inspect}"
+      puts "   Todas as cartas:   #{(pg.cards + game.community_cards).inspect}"
+      puts "   Resultado do HandEvaluator: #{hand.inspect}"
+
+
+      next if hand.nil?
 
       {
         player_game: pg,
         player: pg.player,
-        rank: rank
+        hand: hand
       }
-    end
+    end.compact
 
-    winner = evaluations.max_by { |data| data[:rank] }
+
+    winner = evaluations.max_by { |data| data[:hand][:rank] }
 
     if winner.nil?
       render json: { message: "No valid winner could be determined." }, status: :unprocessable_entity
@@ -116,7 +126,7 @@ class GamesController < ApplicationController
         id: winner[:player].id,
         name: winner[:player].name,
         hand: winner[:player_game].cards,
-        hand_type: winner[:rank]
+        hand_type: winner[:hand] ? winner[:hand][:type] : nil
       },
       pot: game.pot,
       community_cards: game.community_cards,
