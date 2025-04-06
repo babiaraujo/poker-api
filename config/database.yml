@@ -2,9 +2,9 @@ default: &default
   adapter: postgresql
   encoding: unicode
   pool: 5
-  username: myuser         # coloque aqui o mesmo usuário que você criou no psql
-  password: mypassword     # coloque aqui a senha que você definiu
-  host: localhost
+  username: <%= ENV["DATABASE_USER"] %>
+  password: <%= ENV["DATABASE_PASSWORD"] %>
+  host: <%= ENV["DATABASE_HOST"] || "localhost" %>
 
 development:
   <<: *default
@@ -17,5 +17,3 @@ test:
 production:
   <<: *default
   database: poker_api_production
-  username: poker_api
-  password: <%= ENV['POKER_API_DATABASE_PASSWORD'] %>
