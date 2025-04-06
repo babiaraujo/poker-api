@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_06_174417) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_06_215827) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "game_results", force: :cascade do |t|
+    t.bigint "game_id", null: false
+    t.string "winner_type"
+    t.integer "winner_id"
+    t.string "hand_type"
+    t.integer "pot"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_game_results_on_game_id"
+    t.index ["winner_type", "winner_id"], name: "index_game_results_on_winner_type_and_winner_id"
+  end
 
   create_table "games", force: :cascade do |t|
     t.bigint "room_id", null: false
@@ -69,6 +81,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_06_174417) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "game_results", "games"
   add_foreign_key "games", "rooms"
   add_foreign_key "player_actions", "games"
   add_foreign_key "player_actions", "players"

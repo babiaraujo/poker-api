@@ -1,32 +1,51 @@
 class GamesController < ApplicationController
+  PHASES = %w[pre_flop flop turn river]
+
   def next_phase
     game = Game.find(params[:id])
 
-    if game.phase == "river"
-      render json: { message: "Game is already at the final phase." }, status: :unprocessable_entity
+    current_index = PHASES.index(game.phase)
+    if current_index.nil?
+      render json: { error: "current phase invalid." }, status: :unprocessable_entity
       return
     end
 
-    game = GameProgressor.call(game)
+    if current_index >= PHASES.size - 2
+      render json: { message: "game is already in the final phase (#{game.phase})" }, status: :unprocessable_entity
+      return
+    end
+
+    game.update!(phase: PHASES[current_index + 1])
 
     render json: {
-      message: "Game progressed to #{game.phase}",
+      message: "Jogo avançou para #{game.phase}",
       community_cards: game.community_cards
     }
   end
 
-  # AGORA DENTRO DA CLASSE 👇
+
   def action
     game = Game.find(params[:id])
     player = Player.find(params[:player_id])
-    action_type = params[:action_type]
+    action_type = params[:action_type].to_s.downcase
     amount = params[:amount].to_i
     phase = game.phase
 
-    unless %w[call raise fold].include?(action_type)
-      render json: { error: "invalid action type" }, status: :unprocessable_entity
+    unless game.room.players.include?(player)
+      render json: { error: "you are not part of this room" }, status: :forbidden
       return
     end
+
+    unless %w[call raise fold].include?(action_type)
+      render json: { error: "invalid action" }, status: :unprocessable_entity
+      return
+    end
+
+    if %w[call raise].include?(action_type) && amount > player.chips
+      render json: { error: "not enough chips" }, status: :unprocessable_entity
+      return
+    end
+
 
     PlayerAction.create!(
       player: player,
@@ -68,21 +87,28 @@ class GamesController < ApplicationController
 
     evaluations = players.map do |pg|
       all_cards = pg.cards + game.community_cards
-      hand = PokerHandEvaluator.evaluate(all_cards)
+      rank = HandEvaluator.evaluate(all_cards)
 
       {
         player_game: pg,
         player: pg.player,
-        hand: hand
+        rank: rank
       }
     end
 
-    winner = evaluations.max_by { |data| data[:hand][:rank] }
+    winner = evaluations.max_by { |data| data[:rank] }
 
     if winner.nil?
       render json: { message: "No valid winner could be determined." }, status: :unprocessable_entity
       return
     end
+
+    GameResult.create!(
+      game: game,
+      winner: winner[:player],
+      hand_type: winner[:rank],
+      pot: game.pot
+    )
 
     render json: {
       message: "game finished",
@@ -90,7 +116,7 @@ class GamesController < ApplicationController
         id: winner[:player].id,
         name: winner[:player].name,
         hand: winner[:player_game].cards,
-        hand_type: winner[:hand][:type]
+        hand_type: winner[:rank]
       },
       pot: game.pot,
       community_cards: game.community_cards,

@@ -1,5 +1,8 @@
 Rails.application.routes.draw do
-  get "websocket_test/index"
+  get "game_results/index"
+  get "game_results/show"
+  get "/websocket_teste", to: "cable_test#index"  # <-- MOVA pra cá
+
   defaults format: :json do
     resources :rooms do
       member do
@@ -9,8 +12,9 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :players
+    resources :game_results, only: [ :index, :show ]
 
+    resources :players
     post "/evaluate_hand", to: "evaluations#evaluate_hand"
 
     resources :games do
@@ -21,8 +25,5 @@ Rails.application.routes.draw do
   end
 
   get "up" => "rails/health#show", as: :rails_health_check
-
   mount ActionCable.server => "/cable"
-
-  get "/websocket_teste", to: "websocket_test#index"
 end
