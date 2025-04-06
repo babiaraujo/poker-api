@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  room: one
+  pot: 1
+  phase: MyString
+  community_cards: MyText
+
+two:
+  room: two
+  pot: 1
+  phase: MyString
+  community_cards: MyText

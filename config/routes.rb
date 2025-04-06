@@ -4,6 +4,7 @@ Rails.application.routes.draw do
       member do
         post :join
         post :leave
+        post :start
       end
     end
 

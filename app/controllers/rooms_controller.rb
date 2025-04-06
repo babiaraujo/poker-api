@@ -3,8 +3,8 @@ class RoomsController < ApplicationController
 
   # GET /rooms
   def index
-    @rooms = Room.all
-    render json: @rooms
+    @rooms = Room.all.includes(:players)
+    render json: @rooms.as_json(include: { players: { only: [ :id, :name, :chips ] } })
   end
 
   # GET /rooms/1
@@ -62,6 +62,35 @@ class RoomsController < ApplicationController
     else
       render json: { message: "Player not found in room" }, status: :not_found
     end
+  end
+
+  # POST /rooms/:id/start
+  def start
+    room = Room.find(params[:id])
+
+    if room.players.count < 2
+      render json: { message: "Not enough players to start a game" }, status: :unprocessable_entity
+      return
+    end
+
+    game = GameInitializer.call(room)
+
+    players_data = game.player_games.map do |pg|
+      {
+        id: pg.player.id,
+        cards: pg.cards,
+        chips: pg.player.chips
+      }
+    end
+
+    render json: {
+      message: "Game started",
+      initial_state: {
+        players: players_data,
+        community_cards: game.community_cards,
+        pot: game.pot
+      }
+    }
   end
 
   private
