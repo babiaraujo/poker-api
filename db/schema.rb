@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_06_173544) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_06_215827) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "game_results", force: :cascade do |t|
+    t.bigint "game_id", null: false
+    t.string "winner_type"
+    t.integer "winner_id"
+    t.string "hand_type"
+    t.integer "pot"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_game_results_on_game_id"
+    t.index ["winner_type", "winner_id"], name: "index_game_results_on_winner_type_and_winner_id"
+  end
 
   create_table "games", force: :cascade do |t|
     t.bigint "room_id", null: false
@@ -22,6 +34,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_06_173544) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["room_id"], name: "index_games_on_room_id"
+  end
+
+  create_table "player_actions", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.bigint "game_id", null: false
+    t.string "action"
+    t.integer "amount"
+    t.string "phase"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_player_actions_on_game_id"
+    t.index ["player_id"], name: "index_player_actions_on_player_id"
   end
 
   create_table "player_games", force: :cascade do |t|
@@ -57,7 +81,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_06_173544) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "game_results", "games"
   add_foreign_key "games", "rooms"
+  add_foreign_key "player_actions", "games"
+  add_foreign_key "player_actions", "players"
   add_foreign_key "player_games", "games"
   add_foreign_key "player_games", "players"
   add_foreign_key "room_players", "players"

@@ -1,6 +1,10 @@
 class PlayersController < ApplicationController
-  before_action :set_player, only: [:destroy]
+  before_action :set_player, only: [ :show, :destroy ]
 
+  # GET /players/1
+  def show
+    render json: @player
+  end
 
   # POST /players
   def create
@@ -19,13 +23,12 @@ class PlayersController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_player
-      @player = Player.find(params.expect(:id))
-    end
 
-    # Only allow a list of trusted parameters through.
-    def player_params
-      params.expect(player: [ :name, :chips ])
-    end
+  def set_player
+    @player = Player.find(params[:id])
+  end
+
+  def player_params
+    params.require(:player).permit(:name, :chips)
+  end
 end
