@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebSocket Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@rails/actioncable@7.1.0-2.0.1/dist/actioncable.umd.js"></script>
+    <script>
+      window.ActionCable = ActionCable;
+    </script>
+  </head>
+  <body>
+    <h1>WebSocket conectado?</h1>
+
+    <script>
+      const cable = ActionCable.createConsumer("ws://localhost:3000/cable");
+
+      const subscription = cable.subscriptions.create(
+        { channel: "RoomChannel", room_id: 1 },
+        {
+          connected() {
+            console.log("✅ Conectado ao canal!");
+          },
+          disconnected() {
+            console.log("❌ Desconectado do canal.");
+          },
+          received(data) {
+            console.log("📨 Mensagem recebida:", data);
+          }
+        }
+      );
+    </script>
+  </body>
+</html>
