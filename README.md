@@ -76,7 +76,7 @@ ws://localhost:3000/cable
 ---
 
 ## MER
-![alt text](image.png)
+![image](https://github.com/user-attachments/assets/58c6b64a-920b-4072-a927-9e3f74aa89bf)
 
 ## Funcionalidades
 
