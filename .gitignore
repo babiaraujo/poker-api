@@ -1,0 +1,41 @@
+# Ignore arquivos do sistema
+.DS_Store
+*.swp
+
+# Logs
+/log/*
+!/log/.keep
+
+# Temp
+/tmp/*
+!/tmp/.keep
+
+# Banco de dados local e secrets
+/db/*.sqlite3
+/db/*.sqlite3-journal
+/config/master.key
+/config/credentials.yml.enc
+
+# Arquivos de build e cache
+/public/assets
+/public/packs
+/public/packs-test
+/node_modules
+/yarn-error.log
+.byebug_history
+
+# Storage
+/storage/*
+!/storage/.keep
+
+# Bundler e Rails
+/vendor/bundle
+.bundle
+
+# Arquivos do editor
+.idea/
+.vscode/
+
+# Arquivos de ambiente
+.env
+.env.*
