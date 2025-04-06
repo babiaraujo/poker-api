@@ -148,5 +148,4 @@ test/
 ## Observações Finais
 
 - Projeto pronto para testes locais e com Docker
-- Código bem documentado, modular e testado
-- Ideal para demonstrações técnicas e desafios práticos
+- Código documentado, modular e testado
