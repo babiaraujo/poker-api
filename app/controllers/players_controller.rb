@@ -1,12 +1,10 @@
 class PlayersController < ApplicationController
   before_action :set_player, only: [ :show, :destroy ]
 
-  # GET /players/1
   def show
     render json: @player
   end
 
-  # POST /players
   def create
     @player = Player.new(player_params)
 
@@ -17,7 +15,6 @@ class PlayersController < ApplicationController
     end
   end
 
-  # DELETE /players/1
   def destroy
     @player.destroy!
   end

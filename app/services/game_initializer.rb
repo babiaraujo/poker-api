@@ -1,6 +1,6 @@
 class GameInitializer
     RANKS = %w[2 3 4 5 6 7 8 9 T J Q K A]
-    SUITS = %w[H D C S] # Hearts, Diamonds, Clubs, Spades
+    SUITS = %w[H D C S]
 
     def self.call(room)
       deck = RANKS.product(SUITS).map { |r, s| "#{r}#{s}" }.shuffle

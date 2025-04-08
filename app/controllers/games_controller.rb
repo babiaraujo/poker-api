@@ -67,12 +67,35 @@ class GamesController < ApplicationController
     game = Game.find(params[:id])
 
     render json: {
-      game_id: game.id,
-      phase: game.phase,
+      id: game.id,
       pot: game.pot,
+      phase: game.phase,
       community_cards: game.community_cards,
-      players: game.players.select(:id, :name, :chips)
+      players: game.player_games.map do |pg|
+        {
+          playerId: pg.player.id.to_s,
+          name: pg.player.name,
+          chips: pg.player.chips
+        }
+      end,
+      cards: game.player_games.find_by(player_id: current_player_id)&.cards || []
     }
+  end
+
+  private
+
+  def card_strength(rank)
+    order = "23456789TJQKA"
+    order.index(rank)
+  end
+
+  def card_letter(index)
+    order = "23456789TJQKA"
+    order[index]
+  end
+
+  def current_player_id
+    params[:player_id]
   end
 
   def finish
@@ -88,13 +111,6 @@ class GamesController < ApplicationController
     evaluations = players.map do |pg|
       all_cards = pg.cards + game.community_cards
       hand = HandEvaluator.evaluate(all_cards)
-
-      puts ">> Jogador: #{pg.player.name}"
-      puts "   Cartas do jogador: #{pg.cards.inspect}"
-      puts "   Cartas da mesa:    #{game.community_cards.inspect}"
-      puts "   Todas as cartas:   #{(pg.cards + game.community_cards).inspect}"
-      puts "   Resultado do HandEvaluator: #{hand.inspect}"
-
 
       next if hand.nil?
 

@@ -1,18 +1,15 @@
 class RoomsController < ApplicationController
   before_action :set_room, only: %i[ show update destroy ]
 
-  # GET /rooms
   def index
     @rooms = Room.all.includes(:players)
     render json: @rooms.as_json(include: { players: { only: [ :id, :name, :chips ] } })
   end
 
-  # GET /rooms/1
   def show
     render json: @room
   end
 
-  # POST /rooms
   def create
     @room = Room.new(room_params)
 
@@ -23,7 +20,6 @@ class RoomsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /rooms/1
   def update
     if @room.update(room_params)
       render json: @room
@@ -32,27 +28,34 @@ class RoomsController < ApplicationController
     end
   end
 
-  # DELETE /rooms/1
   def destroy
     @room.destroy!
   end
 
-  # POST /rooms/:id/join
   def join
     room = Room.find(params[:id])
-    player = Player.find(params[:player_id])
+
+    if params[:player_id].blank?
+      render json: { error: "dont found player id" }, status: :unprocessable_entity
+      return
+    end
+
+    player = Player.find_by(id: params[:player_id])
+    unless player
+      render json: { error: "playr not found" }, status: :not_found
+      return
+    end
 
     if room.players.include?(player)
-      render json: { message: "Player already in the room" }, status: :unprocessable_entity
+      render json: { message: "Player already in the room" }, status: :ok
     elsif room.players.count >= room.max_players
-      render json: { message: "Room is full" }, status: :unprocessable_entity
+      render json: { message: "Room is full" }, status: :ok
     else
       room.players << player
-      render json: { message: "Player joined successfully" }
+      render json: { message: "Player joined successfully" }, status: :ok
     end
   end
 
-  # POST /rooms/:id/leave
   def leave
     room = Room.find(params[:id])
     player = Player.find(params[:player_id])
@@ -64,34 +67,36 @@ class RoomsController < ApplicationController
     end
   end
 
-  # POST /rooms/:id/start
-  def start
-    room = Room.find(params[:id])
+def start
+  room = Room.find(params[:id])
 
-    if room.players.count < 2
-      render json: { message: "Not enough players to start a game" }, status: :unprocessable_entity
-      return
-    end
+  if room.players.count < 2
+    render json: { message: "Not enough players to start a game" }, status: :unprocessable_entity
+    return
+  end
 
-    game = GameInitializer.call(room)
+  game = GameInitializer.call(room)
 
-    players_data = game.player_games.map do |pg|
-      {
-        id: pg.player.id,
-        cards: pg.cards,
-        chips: pg.player.chips
-      }
-    end
-
-    render json: {
-      message: "Game started",
-      initial_state: {
-        players: players_data,
-        community_cards: game.community_cards,
-        pot: game.pot
-      }
+  players_data = game.player_games.map do |pg|
+    {
+      id: pg.player.id,
+      cards: pg.cards,
+      chips: pg.player.chips
     }
   end
+
+  render json: {
+    message: "Game started",
+    game_id: game.id,
+    initial_state: {
+      players: players_data,
+      community_cards: game.community_cards,
+      pot: game.pot,
+      phase: game.phase
+    }
+  }
+end
+
 
   private
 

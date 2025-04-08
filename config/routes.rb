@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   get "game_results/index"
   get "game_results/show"
-  get "/websocket_teste", to: "cable_test#index"  # <-- MOVA pra cá
+  get "/websocket_teste", to: "cable_test#index"
 
   defaults format: :json do
     resources :rooms do
